@@ -36,3 +36,30 @@ WHERE action_taken = 'ALLOW'
 GROUP BY source_ip, destination_ip
 HAVING total_data_exchanged_mb > 500 -- Flag connections shifting massive payloads
 ORDER BY total_data_exchanged_mb DESC;
+
+-- =====================================================================
+-- ANALYTICAL QUERY 03: NanoMesh Incident Severity Rollup
+-- Summarizes incident counts by severity for report-ready dashboards.
+-- =====================================================================
+SELECT
+    severity_level,
+    COUNT(*) AS incident_count,
+    MIN(ingest_time) AS first_seen,
+    MAX(ingest_time) AS last_seen
+FROM RAW_FIREWALL_LOGS
+WHERE incident_id IS NOT NULL
+GROUP BY severity_level
+ORDER BY incident_count DESC;
+
+-- =====================================================================
+-- ANALYTICAL QUERY 04: Detection Coverage by Rule Name
+-- Shows which detection rules are producing analyst-reviewed findings.
+-- =====================================================================
+SELECT
+    detection_name,
+    severity_level,
+    COUNT(*) AS matched_events,
+    MAX(matched_at) AS latest_match
+FROM DETECTION_RESULTS
+GROUP BY detection_name, severity_level
+ORDER BY matched_events DESC;

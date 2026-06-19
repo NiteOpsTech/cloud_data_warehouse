@@ -1,4 +1,6 @@
--- 1. Establish the isolated Security Analytics Virtual Environment
+-- Cloud Data Warehouse Security Analytics
+-- Snowflake-style schema for NanoMesh lab telemetry.
+
 CREATE DATABASE IF NOT EXISTS SECURITY_OPS_DB;
 USE DATABASE SECURITY_OPS_DB;
 
@@ -15,7 +17,9 @@ CREATE TABLE IF NOT EXISTS RAW_FIREWALL_LOGS (
     destination_ip  VARCHAR(45),
     target_port     NUMBER,
     action_taken    VARCHAR(32),
-    payload_bytes   NUMBER
+    payload_bytes   NUMBER,
+    severity_level  VARCHAR(64),
+    incident_id     VARCHAR(64)
 );
 
 -- 3. Construct an optimized Threat Intelligence Reference table
@@ -24,4 +28,13 @@ CREATE TABLE IF NOT EXISTS KNOWN_MALICIOUS_IPS (
     threat_actor    VARCHAR(128),
     confidence_score NUMBER,
     last_updated    TIMESTAMP_NTZ
+);
+
+CREATE TABLE IF NOT EXISTS DETECTION_RESULTS (
+    detection_id    VARCHAR(64) DEFAULT UUID_STRING(),
+    incident_id     VARCHAR(64),
+    detection_name  VARCHAR(128),
+    severity_level  VARCHAR(64),
+    matched_at      TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP(),
+    analyst_summary VARCHAR
 );
